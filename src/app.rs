@@ -8,6 +8,9 @@ pub struct InsightApp {
     // this how you opt-out of serialization of a member
     #[serde(skip)]
     value: f32,
+
+    // state of windows
+    about_visible: bool,
 }
 
 impl Default for InsightApp {
@@ -16,6 +19,7 @@ impl Default for InsightApp {
             // Example stuff:
             label: "Hello World!".to_owned(),
             value: 2.7,
+            about_visible: false,
         }
     }
 }
@@ -45,7 +49,11 @@ impl eframe::App for InsightApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     /// Put your widgets into a `SidePanel`, `TopPanel`, `CentralPanel`, `Window` or `Area`.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let Self { label, value } = self;
+        let Self {
+            label,
+            value,
+            about_visible: _,
+        } = self;
 
         // Examples of how to create different panels and windows.
         // Pick whichever suits you.
@@ -59,6 +67,11 @@ impl eframe::App for InsightApp {
                 ui.menu_button("File", |ui| {
                     if ui.button("Quit").clicked() {
                         _frame.close();
+                    }
+                });
+                ui.menu_button("Help", |ui| {
+                    if ui.button("About").clicked() {
+                        self.about_visible = true;
                     }
                 });
             });
@@ -104,12 +117,13 @@ impl eframe::App for InsightApp {
             egui::warn_if_debug_build(ui);
         });
 
-        if false {
-            egui::Window::new("Window").show(ctx, |ui| {
-                ui.label("Windows can be moved by dragging them.");
-                ui.label("They are automatically sized based on contents.");
-                ui.label("You can turn on resizing and scrolling if you like.");
-                ui.label("You would normally choose either panels OR windows.");
+        if self.about_visible {
+            egui::Window::new("About").show(ctx, |ui| {
+                ui.heading("Openlaps Insight");
+                ui.label("Copyright 2022 Kris Foster <kris.foster@gmail.com>");
+                if ui.button("Okay").clicked() {
+                    self.about_visible = false;
+                }
             });
         }
     }
