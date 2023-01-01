@@ -1,15 +1,25 @@
+use std::path::Path;
+
+use logger::Logger;
+
+const LOG_FILE: &str = "/tmp/openlaps_dashboard_testing.db";
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct InsightApp {
     // state of windows
     about_visible: bool,
+
+    #[serde(skip)]
+    logger: Logger,
 }
 
 impl Default for InsightApp {
     fn default() -> Self {
         Self {
             about_visible: false,
+            logger: Logger::new(Path::new(LOG_FILE)),
         }
     }
 }
@@ -35,7 +45,10 @@ impl eframe::App for InsightApp {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let Self { about_visible: _ } = self;
+        let Self {
+            about_visible: _,
+            logger,
+        } = self;
 
         #[cfg(not(target_arch = "wasm32"))] // no File->Quit on web pages!
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
@@ -60,6 +73,7 @@ impl eframe::App for InsightApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Lap");
+            ui.label(format!("{:?}", logger.get_last()));
         });
 
         if self.about_visible {
