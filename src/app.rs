@@ -74,6 +74,25 @@ impl eframe::App for InsightApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Lap");
             ui.label(format!("{:?}", logger.get_last()));
+
+            use egui::plot::{Line, Plot, PlotPoints};
+            let data = [
+                [1.0, 1.0],
+                [1.1, 2.0],
+                [1.2, 3.0],
+                [1.3, 3.0],
+                [2.0, 3.0],
+                [2.0, 3.0],
+                [2.0, 2.0],
+                [3.1, 2.0],
+                [2.0, 1.0],
+                [1.0, 1.0],
+            ];
+            let sin: PlotPoints = (0..10).map(|i| data[i]).collect();
+            let line = Line::new(sin);
+            Plot::new("my_plot")
+                .view_aspect(2.0)
+                .show(ui, |plot_ui| plot_ui.line(line));
         });
 
         if self.about_visible {
