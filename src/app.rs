@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use logger::Logger;
+use rbmini::message::RbMessage;
 
 const LOG_FILE: &str = "/tmp/openlaps_dashboard_testing.db";
 
@@ -10,6 +11,14 @@ const LOG_FILE: &str = "/tmp/openlaps_dashboard_testing.db";
 pub struct InsightApp {
     // state of windows
     about_visible: bool,
+
+    // The session ID currently being worked on in the app
+    current_session: Option<u64>,
+
+    // TODO this needs to become a common logger message format
+    // not specific to any hardware implementations. This is just
+    // convenient for the moment.
+    session_data: Option<RbMessage>,
 
     #[serde(skip)]
     logger: Logger,
@@ -24,6 +33,8 @@ impl Default for InsightApp {
             about_visible: false,
             logger: Logger::new(Path::new(LOG_FILE)),
             sessions: Vec::new(),
+            current_session: None,
+            session_data: None,
         }
     }
 }
@@ -57,6 +68,8 @@ impl eframe::App for InsightApp {
             about_visible: _,
             logger,
             sessions,
+            current_session,
+            session_data,
         } = self;
 
         #[cfg(not(target_arch = "wasm32"))] // no File->Quit on web pages!
@@ -79,7 +92,9 @@ impl eframe::App for InsightApp {
         egui::SidePanel::left("sessions_panel").show(ctx, |ui| {
             ui.heading("Sessions");
             for session in sessions {
-                ui.label(format!("{}", session));
+                if ui.add(egui::Button::new(format!("{}", session))).clicked() {
+                    println!("Loading session {}", session);
+                }
             }
         });
 
