@@ -13,6 +13,9 @@ pub struct InsightApp {
 
     #[serde(skip)]
     logger: Logger,
+
+    #[serde(skip)]
+    sessions: Vec<u64>,
 }
 
 impl Default for InsightApp {
@@ -20,20 +23,25 @@ impl Default for InsightApp {
         Self {
             about_visible: false,
             logger: Logger::new(Path::new(LOG_FILE)),
+            sessions: Vec::new(),
         }
     }
 }
 
 impl InsightApp {
     /// Called once before the first frame.
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         // Load previous app state (if any).
         // `persistence` feature must be enabled for this to work.
-        if let Some(storage) = cc.storage {
-            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
-        }
+        // Not worried about persistence right now
+        //if let Some(storage) = cc.storage {
+        //    return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+        //}
 
-        Default::default()
+        let mut app = InsightApp::default();
+        // TODO handle errors
+        app.sessions = app.logger.get_sessions().unwrap();
+        app
     }
 }
 
@@ -48,6 +56,7 @@ impl eframe::App for InsightApp {
         let Self {
             about_visible: _,
             logger,
+            sessions,
         } = self;
 
         #[cfg(not(target_arch = "wasm32"))] // no File->Quit on web pages!
@@ -67,8 +76,11 @@ impl eframe::App for InsightApp {
             });
         });
 
-        egui::SidePanel::left("laps_panel").show(ctx, |ui| {
-            ui.heading("Laps");
+        egui::SidePanel::left("sessions_panel").show(ctx, |ui| {
+            ui.heading("Sessions");
+            for session in sessions {
+                ui.label(format!("{}", session));
+            }
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -96,13 +108,16 @@ impl eframe::App for InsightApp {
         });
 
         if self.about_visible {
-            egui::Window::new("About").show(ctx, |ui| {
-                ui.heading("Openlaps Insight");
-                ui.label("Copyright 2022 Kris Foster <kris.foster@gmail.com>");
-                if ui.button("Okay").clicked() {
-                    self.about_visible = false;
-                }
-            });
+            egui::Window::new("About")
+                .resizable(false)
+                .title_bar(false)
+                .show(ctx, |ui| {
+                    ui.heading("Openlaps Insight");
+                    ui.label("Copyright 2022 Kris Foster <kris.foster@gmail.com>");
+                    if ui.button("Okay").clicked() {
+                        self.about_visible = false;
+                    }
+                });
         }
     }
 }
