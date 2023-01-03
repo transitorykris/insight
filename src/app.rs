@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use egui::plot::PlotPoint;
 use logger::Logger;
 use rbmini::message::RbMessage;
 
@@ -18,7 +19,7 @@ pub struct InsightApp {
     // TODO this needs to become a common logger message format
     // not specific to any hardware implementations. This is just
     // convenient for the moment.
-    session_data: Option<RbMessage>,
+    session_data: Option<Vec<RbMessage>>,
 
     #[serde(skip)]
     logger: Logger,
@@ -68,7 +69,7 @@ impl eframe::App for InsightApp {
             about_visible: _,
             logger,
             sessions,
-            current_session,
+            current_session: _,
             session_data,
         } = self;
 
@@ -93,7 +94,9 @@ impl eframe::App for InsightApp {
             ui.heading("Sessions");
             for session in sessions {
                 if ui.add(egui::Button::new(format!("{}", session))).clicked() {
-                    println!("Loading session {}", session);
+                    let points = logger.get_session(*session).unwrap();
+                    self.session_data = Some(points);
+                    self.current_session = Some(*session);
                 }
             }
         });
@@ -103,7 +106,7 @@ impl eframe::App for InsightApp {
             ui.label(format!("{:?}", logger.get_last()));
 
             use egui::plot::{Line, Plot, PlotPoints};
-            let data = [
+            let mut data = [
                 [1.0, 1.0],
                 [1.1, 2.0],
                 [1.2, 3.0],

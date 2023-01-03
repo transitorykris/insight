@@ -1504,7 +1504,9 @@ dependencies = [
 name = "logger"
 version = "0.1.0"
 dependencies = [
+ "rbmini",
  "rusqlite",
+ "serde_json",
 ]
 
 [[package]]
@@ -2004,6 +2006,7 @@ dependencies = [
  "fallible-streaming-iterator",
  "hashlink",
  "libsqlite3-sys",
+ "serde_json",
  "smallvec",
 ]
 
