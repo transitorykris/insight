@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use egui::plot::PlotPoint;
 use logger::Logger;
 use rbmini::message::RbMessage;
 
@@ -70,7 +69,7 @@ impl eframe::App for InsightApp {
             logger,
             sessions,
             current_session: _,
-            session_data,
+            session_data: _,
         } = self;
 
         #[cfg(not(target_arch = "wasm32"))] // no File->Quit on web pages!
@@ -106,19 +105,20 @@ impl eframe::App for InsightApp {
             ui.label(format!("{:?}", logger.get_last()));
 
             use egui::plot::{Line, Plot, PlotPoints};
-            let mut data = [
-                [1.0, 1.0],
-                [1.1, 2.0],
-                [1.2, 3.0],
-                [1.3, 3.0],
-                [2.0, 3.0],
-                [2.0, 3.0],
-                [2.0, 2.0],
-                [3.1, 2.0],
-                [2.0, 1.0],
-                [1.0, 1.0],
-            ];
-            let sin: PlotPoints = (0..10).map(|i| data[i]).collect();
+
+            if self.current_session.is_none() {
+                return;
+            }
+
+            // XXX this should happen once when we load the points
+            let mut data: Vec<[f64; 2]> = Vec::new();
+            for point in self.session_data.as_mut().unwrap() {
+                let lat = point.gps_coordinates().latitude();
+                let long = point.gps_coordinates().longitude();
+                data.push([lat, long]);
+            }
+
+            let sin: PlotPoints = (0..data.len()).map(|i| data[i]).collect();
             let line = Line::new(sin);
             Plot::new("my_plot")
                 .view_aspect(2.0)
