@@ -103,9 +103,9 @@ impl eframe::App for InsightApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Lap");
-            ui.label(format!("{:?}", logger.get_last()));
 
             if self.current_session.is_none() {
+                ui.label("Select a session on the left to get started");
                 return;
             }
 
