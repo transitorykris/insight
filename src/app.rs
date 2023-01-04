@@ -1,3 +1,4 @@
+use egui::plot::{Line, Plot, PlotPoints};
 use std::path::Path;
 
 use logger::Logger;
@@ -103,8 +104,6 @@ impl eframe::App for InsightApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Lap");
             ui.label(format!("{:?}", logger.get_last()));
-
-            use egui::plot::{Line, Plot, PlotPoints};
 
             if self.current_session.is_none() {
                 return;
