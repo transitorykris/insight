@@ -121,6 +121,7 @@ impl eframe::App for InsightApp {
             let line = Line::new(sin);
             Plot::new("my_plot")
                 .view_aspect(2.0)
+                .label_formatter(|_, value| format!("lat: {}\nlong: {}", value.x, value.y))
                 .show(ui, |plot_ui| plot_ui.line(line));
         });
 
