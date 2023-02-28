@@ -8,11 +8,15 @@ fn main() {
     tracing_subscriber::fmt::init();
 
     let native_options = eframe::NativeOptions::default();
-    eframe::run_native(
+    if eframe::run_native(
         "Openlaps Insight",
         native_options,
         Box::new(|cc| Box::new(insight::InsightApp::new(cc))),
-    );
+    )
+    .is_err()
+    {
+        println!("Eframe exited abormally");
+    }
 }
 
 // when compiling to web using trunk.
